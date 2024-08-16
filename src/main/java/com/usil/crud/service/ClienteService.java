@@ -5,9 +5,9 @@ import com.usil.crud.entidad.Cliente;
 import java.util.Optional;
 
 public interface ClienteService {
-    public Optional<Cliente> findById(Long id);
-    public Iterable<Cliente> findAll();
-    public Cliente addCliente(Cliente cliente);
-    public Cliente updateCliente(Cliente cliente);
-    public void deleteCliente(Long id);
+    Optional<Cliente> obtenerCliente(Long id);
+    Iterable<Cliente> mostrarClientes();
+    Cliente agregarCliente(Cliente cliente);
+    Optional<Cliente> actualizarCliente (Cliente cliente);
+    boolean eliminarCliente(Long id);
 }

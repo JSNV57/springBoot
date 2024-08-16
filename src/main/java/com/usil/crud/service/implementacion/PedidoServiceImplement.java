@@ -6,23 +6,41 @@ import com.usil.crud.service.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class PedidoServiceImplement implements PedidoService {
     @Autowired
     private PedidoRepository pedidoRepository;
 
     @Override
-    public Pedido findById(Long id) {
-        return pedidoRepository.findById(id).get();
+    public Optional<Pedido> obtenerPedido(Long id) {
+        return pedidoRepository.findById(id);
     }
 
     @Override
-    public Iterable<Pedido> findAll() {
+    public Iterable<Pedido> mostrarPedidos() {
         return pedidoRepository.findAll();
     }
 
     @Override
-    public void save(Pedido pedido) {
-        pedidoRepository.save(pedido);
+    public Pedido agregarPedido(Pedido pedido) {
+        return pedidoRepository.save(pedido);
+    }
+
+    @Override
+    public Optional<Pedido>  actualizarPedido(Pedido pedido) {
+        return Optional.ofNullable(pedido)
+                .filter(_ -> obtenerPedido(pedido.getId()).isPresent()) // Verificar que el pedido exista
+                .map(pedidoRepository::save);
+    }
+
+    @Override
+    public boolean eliminarPedido(Long id) {
+        Optional<Pedido> pedidoOpt = pedidoRepository.findById(id);
+        //Elimina solo si existe pedido
+        pedidoOpt.ifPresent(_ -> pedidoRepository.deleteById(id));
+        // Retornar true si el pedido fue encontrado y eliminado, false de lo contrario
+        return pedidoOpt.isPresent();
     }
 }

@@ -12,28 +12,37 @@ import java.util.Optional;
 public class ClienteServiceImplement implements ClienteService {
     @Autowired
     private ClienteRepository clienteRepository;
+
     @Override
-    public Optional<Cliente> findById(Long id) {
+    public Optional<Cliente> obtenerCliente(Long id) {
         return clienteRepository.findById(id);
     }
 
     @Override
-    public Iterable<Cliente> findAll() {
+    public Iterable<Cliente> mostrarClientes() {
         return clienteRepository.findAll();
     }
 
     @Override
-    public Cliente addCliente(Cliente cliente) {
+    public Cliente agregarCliente(Cliente cliente) {
         return clienteRepository.save(cliente);
     }
 
     @Override
-    public Cliente updateCliente(Cliente cliente) {
-        return clienteRepository.save(cliente);
+    public Optional<Cliente> actualizarCliente(Cliente cliente) {
+        return Optional.ofNullable(cliente)
+                .filter(c -> obtenerCliente(c.getId()).isPresent()) // Verificar que el cliente existe
+                .map(clienteRepository::save);
     }
 
     @Override
-    public void deleteCliente(Long id) {
-        clienteRepository.deleteById(id);
+    public boolean eliminarCliente(Long id) {
+        Optional<Cliente> clienteOpt = clienteRepository.findById(id);
+
+        // Usar ifPresent para eliminar el cliente si existe
+        clienteOpt.ifPresent(cliente -> clienteRepository.deleteById(id));
+
+        // Retornar true si el cliente fue encontrado y eliminado, false de lo contrario
+        return clienteOpt.isPresent();
     }
 }
