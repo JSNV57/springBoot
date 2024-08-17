@@ -1,6 +1,8 @@
 package com.usil.crud.service.implementacion;
 
+import com.usil.crud.dto.ClienteDTO;
 import com.usil.crud.entidad.Cliente;
+import com.usil.crud.mapper.ClienteMapper;
 import com.usil.crud.repository.ClienteRepository;
 import com.usil.crud.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,29 +12,36 @@ import java.util.Optional;
 
 @Service
 public class ClienteServiceImplement implements ClienteService {
+    private final ClienteRepository clienteRepository;
+    private final ClienteMapper clienteMapper;
+
     @Autowired
-    private ClienteRepository clienteRepository;
-
-    @Override
-    public Optional<Cliente> obtenerCliente(Long id) {
-        return clienteRepository.findById(id);
+    public ClienteServiceImplement(ClienteRepository clienteRepository, ClienteMapper clienteMapper) {
+        this.clienteRepository = clienteRepository;
+        this.clienteMapper = clienteMapper;
     }
 
     @Override
-    public Iterable<Cliente> mostrarClientes() {
-        return clienteRepository.findAll();
+    public Optional<ClienteDTO> obtenerCliente(Long id) {
+        return clienteRepository.findById(id)
+                .map(clienteMapper::toDTO);
     }
 
     @Override
-    public Cliente agregarCliente(Cliente cliente) {
-        return clienteRepository.save(cliente);
+    public Iterable<ClienteDTO> mostrarClientes() {
+        return clienteMapper.toDtoIterable(clienteRepository.findAll());
     }
 
     @Override
-    public Optional<Cliente> actualizarCliente(Cliente cliente) {
-        return Optional.ofNullable(cliente)
+    public ClienteDTO agregarCliente(ClienteDTO clienteDTO) {
+        return clienteMapper.toDTO(clienteRepository.save(clienteMapper.toEntity(clienteDTO)));
+    }
+
+    @Override
+    public Optional<ClienteDTO> actualizarCliente(ClienteDTO clienteDTO) {
+        return Optional.ofNullable(clienteDTO)
                 .filter(c -> obtenerCliente(c.getId()).isPresent()) // Verificar que el cliente existe
-                .map(clienteRepository::save);
+                .map(clienteDTO1 -> clienteMapper.toDTO(clienteRepository.save(clienteMapper.toEntity(clienteDTO1))));
     }
 
     @Override
@@ -40,7 +49,7 @@ public class ClienteServiceImplement implements ClienteService {
         Optional<Cliente> clienteOpt = clienteRepository.findById(id);
 
         // Usar ifPresent para eliminar el cliente si existe
-        clienteOpt.ifPresent(cliente -> clienteRepository.deleteById(id));
+        clienteOpt.ifPresent(_ -> clienteRepository.deleteById(id));
 
         // Retornar true si el cliente fue encontrado y eliminado, false de lo contrario
         return clienteOpt.isPresent();

@@ -10,8 +10,12 @@ import java.util.Optional;
 
 @Service
 public class PedidoServiceImplement implements PedidoService {
+    private final PedidoRepository pedidoRepository;
+
     @Autowired
-    private PedidoRepository pedidoRepository;
+    public PedidoServiceImplement(PedidoRepository pedidoRepository) {
+        this.pedidoRepository = pedidoRepository;
+    }
 
     @Override
     public Optional<Pedido> obtenerPedido(Long id) {
